@@ -1,0 +1,65 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Machine Learning</title>
+  <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet'>
+
+  <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
+  <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script>
+
+
+  <script>
+
+    var len = 1340;
+    var brt = 650;
+
+    var classifier;
+
+    var img;
+    var vid;
+    
+    function preload() {
+      //img = loadImage('broom.jpg');
+    }
+
+    function setup(){
+      createCanvas(len,brt);
+      background(0);
+      vid = createCapture(VIDEO);
+      vid.hide();
+      classifier = ml5.imageClassifier('MobileNet', vid, modelLoaded);
+      //image(img,0,0,500,500);
+    }
+
+    function draw(){
+      translate(vid.width, 0);
+      scale(-1,1);
+      image(vid,-100,40);
+    }
+
+    function modelLoaded(){
+        console.log('modelLoadedBoobs');
+        classifier.classify(gotResults);
+    }
+
+    function gotResults(error,results){
+      if(error){
+        console.log(error);
+      }
+      else{
+        console.log(results);
+        console.log(results[0].label);
+        classifier.classify(gotResults); 
+      }
+    }
+
+   
+
+  </script>
+
+</head>
+ <body style="text-align: center;">
+
+</body>
+</html>

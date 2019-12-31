@@ -1,0 +1,111 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Machine Learning</title>
+  <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet'>
+
+  <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
+  <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script>
+
+
+  <script>
+
+    var len = 1340;
+    var brt = 640;
+    var classifier;
+    var vid;
+
+    let knn;
+    let features;
+    var ready = false;
+    var logits;
+
+    function modelLoaded() {
+      console.log('Model Loaded Boobs!');
+      knn = ml5.KNNClassifier();
+      ready = 1;
+      // knn.load('model.json',function(){
+      //   console.log('KNN saved data Loaded');
+      //   goClassify();
+      // });
+    }
+
+    function setup(){
+      var canvas  = createCanvas(len,brt);
+      canvas.parent('#canvasDiv');
+      background(0);
+      vid = createCapture(VIDEO);
+      vid.hide();
+
+      features = ml5.featureExtractor('MobileNet', modelLoaded);
+    }
+
+    function draw(){
+      translate(vid.width, 0);
+      scale(-1.12,1.2);
+      image(vid,-350,20);
+      if (ready == 1 && knn.getNumLabels() > 0) {
+        goClassify();
+        ready = 0;
+      }
+    }
+
+    function goClassify() {
+      logits = features.infer(vid);
+      knn.classify(logits, function(error, result) {
+        if (error) {
+          console.error(error);
+        } 
+        else {
+          console.log(result);
+          document.getElementById('res').innerHTML = result.label;
+          goClassify();
+        }
+      });
+    }
+    
+
+    function func1(){
+        console.log('left');
+        logits = features.infer(vid);
+        knn.addExample(logits, 'LEFT');
+        goClassify();
+    }
+
+    function func2(){
+        console.log('none');
+        logits = features.infer(vid);
+        knn.addExample(logits, 'NONE');
+        goClassify();
+    }
+
+    function func3(){
+        console.log('right');
+        logits = features.infer(vid);
+        knn.addExample(logits, 'RIGHT');
+        goClassify();
+    }
+
+    function func4(){
+        console.log('save');
+        knn.save("model.json");
+    }
+
+    
+
+   
+
+  </script>
+
+</head>
+ <body style="text-align: center;">
+    <div id='canvasDiv' style="zoom: 0.6;"></div> <br>
+    <button onclick="func1()">LEFT</button>
+    <button onclick="func2()">NONE</button>
+    <button onclick="func3()">RIGHT</button>
+    <button onclick="func4()">SAVE</button><br>
+    Result : <span id='res'></span><br>
+    Accuracy :<span id='conf'></span>
+</body>
+</html>

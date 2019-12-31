@@ -1,0 +1,88 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Machine Learning</title>
+  <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet'>
+
+  <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+
+  <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script>
+
+
+  <script>
+
+    var len = 1340;
+    var brt = 500;
+
+    var vid;
+    var classifier;
+
+    function preload(){
+      classifier = ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/0cjlxbAb/'  + 'model.json');
+    }
+
+    function setup(){
+      var canvas  = createCanvas(len,brt);
+      canvas.parent('#canvasDiv');
+      background(0);
+      vid = createCapture(VIDEO);
+      vid.hide();
+      classifyVideo();
+    }
+
+    function classifyVideo(){
+      classifier.classify(vid,gotResult);
+    }
+
+    function gotResult(error, result){
+      if(error){
+        console.error(error);   
+        return;   
+      }
+      console.log(result);
+      console.log(result[0].label);
+      document.getElementById('res').innerHTML = result[0].label;
+      classifyVideo();
+    }
+
+    function draw(){
+      translate(vid.width, 0);
+      scale(-1.0,1.0);
+      image(vid,-980,brt/16,200,150);
+    }
+  </script>
+
+  <style>
+  
+	.btn1{
+			color: white;
+			font-size: 18px;
+			font-family: 'Abel';
+			background-color:  #009900;
+			padding: 2px;
+			padding-right: 40px;
+			padding-left: 40px;
+			border: 2px solid white;
+			border-radius: 4px;
+		  	cursor: pointer;
+		  	transition-duration: 0.2s;
+		}
+
+	.btn1:hover{
+			background-color:  #00cc00;
+			box-shadow: 0 8px 16px 0 rgba(0,0,0,0.1), 0 6px 20px 0 rgba(0,0,0,0.19);
+		}
+
+  #canvasDiv{
+      margin: auto;
+  }
+  </style>
+
+</head>
+ <body style="text-align: center;">
+    <div id='canvasDiv'"></div><br><br>
+    RESULT : <span id='res'></span><br>
+</body>
+</html>

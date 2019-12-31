@@ -1,0 +1,116 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Machine Learning</title>
+  <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet'>
+
+  <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
+  <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script>
+
+
+  <script>
+
+    var len = 1340;
+    var brt = 640;
+    var classifier;
+    var vid;
+    var featureExtractor;
+
+    function modelLoaded() {
+      console.log('Model Loaded!');
+      // classifier.load('model.json', customModelReady);
+    }
+
+    function customModelReady() {
+      console.log('Custom Model Ready');
+      classifier.classify(gotResults);
+    }
+
+    function videoReady() {
+      console.log('Video Ready!');
+      classifier.config.numLabels = 3;
+      console.log(classifier);
+    }
+
+    function setup(){
+      var canvas  = createCanvas(len,brt);
+      canvas.parent('#canvasDiv');
+      background(0);
+      vid = createCapture(VIDEO);
+      vid.hide();
+      featureExtractor = ml5.featureExtractor('MobileNet', modelLoaded);
+      classifier = featureExtractor.classification(vid, videoReady);
+      
+    }
+
+    function draw(){
+      translate(vid.width, 0);
+      scale(-1.12,1.2);
+      image(vid,-350,20);
+    }
+
+    function func1(){
+        console.log('left');
+        classifier.addImage(vid, 'LEFT',function(){
+          console.log('left added');
+        });
+    }
+
+    function func4(){
+        console.log('none');
+        classifier.addImage(vid, 'NONE',function(){
+          console.log('none added');
+        });
+    }
+
+    function func2(){
+        console.log('right');
+        classifier.addImage(vid, 'RIGHT',function(){
+          console.log('right added');
+        });
+    }
+
+    function func0(){
+      classifier.train(function(lossValue){
+        console.log(lossValue);
+        if(lossValue == null){
+          console.log('TRAINING DONE!');
+          classifier.classify(gotResults);
+        }
+      });
+    }
+
+    function func3(){
+      classifier.save();
+    }
+
+    function gotResults(error,results){
+      if(error){
+        console.log(error);
+      }
+      else{
+        console.log(results);
+        console.log(results[0].label);
+        document.getElementById('res').innerHTML = results[0].label;
+        document.getElementById('conf').innerHTML = results[0].confidence;
+        classifier.classify(gotResults); 
+      }
+    }
+
+   
+
+  </script>
+
+</head>
+ <body style="text-align: center;">
+    <div id='canvasDiv' style="zoom: 0.6;"></div> <br>
+    <button onclick="func1()">LEFT</button>
+    <button onclick="func2()">RIGHT</button>
+    <button onclick="func0()">Train</button>
+    <button onclick="func4()">NONE</button>
+    <button onclick="func3()">SAVE</button><br>
+    Result : <span id='res'></span><br>
+    Accuracy :<span id='conf'></span>
+</body>
+</html>
